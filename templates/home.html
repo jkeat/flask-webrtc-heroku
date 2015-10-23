@@ -2,7 +2,6 @@
 <head>
 	<meta charset="UTF-8">
 	<title>quick flask starter</title>
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
@@ -13,7 +12,7 @@
     	// Compatibility shim
     	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
     	// PeerJS object
-    	var peer = new Peer({　host:'peerjskeatjm.herokuapp.com', secure:true, port:443, key: 'peerjs', debug: 3})
+    	var peer = new Peer({ key: {{ peerkey }} })
     	peer.on('open', function(){
     	  $('#my-id').text(peer.id);
     	});
