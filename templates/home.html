@@ -1,32 +1,43 @@
 <!DOCTYPE html>
 <head>
 	<meta charset="UTF-8">
-	<title>quick flask starter</title>
+	<title>Hotline Bling (WebRTC)</title>
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/peer.js') }}"></script>
 	<script>
-		// FROM: https://github.com/atskimura/peerjs-examples-heroku
+		// ADAPTED FROM: https://github.com/atskimura/peerjs-examples-heroku
+
+		/* step1 = setting up, getting user media
+		   step2 = all set up, ready to call or be called
+		   step3 = active call */
 
     	// Compatibility shim
     	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
     	// PeerJS object
     	var peer = new Peer({ key: "{{ peerkey }}" })
+
     	peer.on('open', function(){
     	  $('#my-id').text(peer.id);
     	});
+
     	// Receiving a call
     	peer.on('call', function(call){
     	  // Answer the call automatically (instead of prompting user) for demo purposes
     	  call.answer(window.localStream);
     	  step3(call);
     	});
+
     	peer.on('error', function(err){
     	  alert(err.message);
     	  // Return to step 2 if error occurs
     	  step2();
     	});
+
     	// Click handlers setup
     	$(function(){
     	  $('#make-call').click(function(){
@@ -46,20 +57,26 @@
     	  // Get things started
     	  step1();
     	});
-    	function step1 () {
+
+    	function step1 () { // Getting user media
     	  // Get audio/video stream
     	  navigator.getUserMedia({audio: true, video: true}, function(stream){
     	    // Set your video displays
     	    $('#my-video').prop('src', URL.createObjectURL(stream));
     	    window.localStream = stream;
     	    step2();
-    	  }, function(){ $('#step1-error').show(); });
+    	  }, function () {
+    	  	$('#initial-media-message').hide();
+    	  	$('#step1-error').show();
+    	  });
     	}
-    	function step2 () {
-    	  $('#step1, #step3').hide();
-    	  $('#step2').show();
+
+    	function step2 () { // Not calling. Ready to call.
+    	  $('.step1, .step3').hide();
+    	  $('.step2').show();
     	}
-    	function step3 (call) {
+
+    	function step3 (call) { // Calling.
     	  // Hang up on an existing call if present
     	  if (window.existingCall) {
     	    window.existingCall.close();
@@ -72,52 +89,57 @@
     	  window.existingCall = call;
     	  $('#their-id').text(call.peer);
     	  call.on('close', step2);
-    	  $('#step1, #step2').hide();
-    	  $('#step3').show();
+    	  $('.step1, .step2').hide();
+    	  $('.step3').show();
         }
     </script>
 </head>
 <body>
-  <div class="pure-g">
 
-      <!-- Video area -->
-      <div class="pure-u-2-3" id="video-container">
-        <video id="their-video" autoplay></video>
-        <video id="my-video" muted="true" autoplay></video>
-      </div>
+<div class="call-area">
+	<div class="step1 mid-banner">
+		<div id="initial-media-message" class="blue large-pad large-text">
+			Please click `allow` on the top of the screen so we can access your webcam and microphone for calls.
+		</div>
+		<div id="step1-error" class="red large-pad large-text">
+			<div>Failed to access the webcam and microphone. Make sure to click allow when asked for permission by the browser.</div>
+			<button id="step1-retry" class="button white small-margin-top">Try again</button>
+		</div>
+	</div>
 
-      <!-- Steps -->
-      <div class="pure-u-1-3">
-        <h2>PeerJS Video Chat</h2>
+	<!-- Their video -->
+	<video id="their-video" muted="true" autoplay></video>
 
-        <!-- Get local audio/video stream -->
-        <div id="step1">
-          <p>Please click `allow` on the top of the screen so we can access your webcam and microphone for calls.</p>
-          <div id="step1-error">
-            <p>Failed to access the webcam and microphone. Make sure to run this demo on an http server and click allow when asked for permission by the browser.</p>
-            <a href="#" class="pure-button pure-button-error" id="step1-retry">Try again</a>
-          </div>
-        </div>
+	<!-- My video -->
+	<div class="top right corner">
+		<video id="my-video" muted="true" autoplay></video>
+		<div class="step2 step3 overlay small-pad small-text centered">ID: <span id="my-id" class="">...</span></div>
+	</div>
 
-        <!-- Make calls to others -->
-        <div id="step2">
-          <p>Your id: <span id="my-id">...</span></p>
-          <p>Share this id with others so they can call you.</p>
-          <h3>Make a call</h3>
-          <div class="pure-form">
-            <input type="text" placeholder="Call user id..." id="callto-id">
-            <a href="#" class="pure-button pure-button-success" id="make-call">Call</a>
-          </div>
-        </div>
+	<!-- Their info -->
+	<div class="step3 top left corner">
+		<div class="overlay medium-pad medium-text">
+			<div>Now talking with:</div>
+			<div><span id="their-id"></span></div>
+		</div>
+	</div>
 
-        <!-- Call in progress -->
-        <div id="step3">
-          <p>Currently in call with <span id="their-id">...</span></p>
-          <p><a href="#" class="pure-button pure-button-error" id="end-call">End call</a></p>
-        </div>
-      </div>
-  </div>
-
-
+	<!-- Controls (Call/end) -->
+	<div class="control-area">
+		<div>
+			<div class="controls">
+				<div class="step2">
+					<div>
+					  <input type="text" placeholder="User ID..." id="callto-id">
+					  <button class="green button" id="make-call">Call</button>
+					</div>
+				</div>
+				<div class="step3">
+				  <p><a class="red button" id="end-call">End call</a></p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 </body>
 </html>
