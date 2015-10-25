@@ -6,11 +6,6 @@
 // Compatibility shim
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-// PeerJS object
-var peer = new Peer({
-    key: "{{ peerkey }}"
-})
-
 peer.on('open', function() {
     $('#my-id').text(peer.id);
 });

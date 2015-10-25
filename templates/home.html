@@ -10,10 +10,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/peer.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/videocall.js') }}"></script>
     <script>
-        var x = 6;
+        // PeerJS object
+        var peer = new Peer({
+            key: "{{ peerkey }}"
+        })
     </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/videocall.js') }}"></script>
 </head>
 
 <body>
